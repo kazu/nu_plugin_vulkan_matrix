@@ -63,7 +63,7 @@ release: release-check
 	version=$${package_id##*\#}; version=$${version##*@}
 	test "$$version" = "$(V)"
 	$(MAKE) tag
-	status=$$(curl --silent --show-error --retry 3 --output /dev/null --write-out '%{http_code}' https://crates.io/api/v1/crates/nu_plugin_vulkan_matrix)
+	status=$$(curl --silent --show-error --retry 3 --user-agent 'nu_plugin_vulkan_matrix-release (https://github.com/kazu/nu_plugin_vulkan_matrix)' --output /dev/null --write-out '%{http_code}' https://crates.io/api/v1/crates/nu_plugin_vulkan_matrix)
 	case "$$status" in
 	  404) cargo publish --locked ;;
 	  200) ;; # Subsequent versions are published by the tag's workflow.

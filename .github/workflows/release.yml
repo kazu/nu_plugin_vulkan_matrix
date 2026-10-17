@@ -52,7 +52,7 @@ jobs:
           CRATE_VERSION: ${{ steps.target.outputs.version }}
         run: |
           set -euo pipefail
-          status=$(curl --silent --show-error --retry 3 --output /dev/null --write-out '%{http_code}' "https://crates.io/api/v1/crates/$CRATE_NAME/$CRATE_VERSION")
+          status=$(curl --silent --show-error --retry 3 --user-agent 'nu_plugin_vulkan_matrix-release (https://github.com/kazu/nu_plugin_vulkan_matrix)' --output /dev/null --write-out '%{http_code}' "https://crates.io/api/v1/crates/$CRATE_NAME/$CRATE_VERSION")
           case "$status" in
             200) echo 'exists=true' >> "$GITHUB_OUTPUT" ;;
             404) echo 'exists=false' >> "$GITHUB_OUTPUT" ;;
