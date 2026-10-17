@@ -26,13 +26,23 @@ GitHub リポジトリを公開し、crates.io にログインした環境から
 
 ```sh
 make package-backend
+make publish-backend-dry-run
 make publish-backend
 make package
+make publish-dry-run
 make publish
 ```
 
 バックエンドの公開完了後、crates.io のインデックスに反映されてから本体へ進む。
 トークンはリポジトリやログに保存しない。
+
+本体の dry-run と package は、バックエンドの初回公開・インデックス反映後に実行する。
+
+GitHub CI は push 時に動く。手動で再実行する場合は `make ci-kick` を使う。
+対象ブランチは既定で `master`、変更する場合は `make ci-kick CI_REF=ブランチ名` とする。
+CI とリリースは Cargo のダウンロード済み依存と共通の `target/` のビルド結果を
+`Swatinem/rust-cache` で再利用する。キャッシュの保存は `master` の CI で行い、
+リリースでは復元のみ行う。
 
 ## GitHub Actions からの公開
 

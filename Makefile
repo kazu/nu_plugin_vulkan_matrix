@@ -5,9 +5,10 @@ export CARGO_TARGET_DIR ?= $(HOME)/.cargo/target
 export RAYON_NUM_THREADS := 1
 export MATMUL_NUM_THREADS := 1
 
-.PHONY: ci ci-host backend-check package package-backend publish publish-backend __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
+.PHONY: ci ci-host ci-kick backend-check package package-backend publish publish-backend publish-dry-run publish-backend-dry-run __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
 NU ?= nu
 NU_ARGS ?=
+CI_REF ?= master
 package-backend:
 	cargo package --manifest-path backend/Cargo.toml --locked
 
@@ -19,6 +20,15 @@ publish-backend:
 
 publish:
 	cargo publish --locked
+
+publish-backend-dry-run:
+	cargo publish --manifest-path backend/Cargo.toml --locked --dry-run
+
+publish-dry-run:
+	cargo publish --locked --dry-run
+
+ci-kick:
+	gh workflow run ci.yml --ref $(CI_REF)
 
 backend-check:
 	cargo fmt --manifest-path backend/Cargo.toml --check

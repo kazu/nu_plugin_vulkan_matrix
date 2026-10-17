@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,10 +23,9 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: |
-            . -> target
-            backend -> target
-            validation -> target
+          shared-key: host-check
+          workspaces: . -> target
+          save-if: ${{ github.ref == 'refs/heads/master' }}
       - run: make ci-host
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
