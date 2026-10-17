@@ -4,34 +4,29 @@ on:
   push:
     tags:
       - 'v*'
-
-permissions:
-  contents: read
-
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+  workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     environment: release
     permissions:
-      contents: write
+      contents: read
       id-token: write
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: 1.96.1
-          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: host-check
           workspaces: . -> target
           save-if: false
       - name: Check tag version
-        id: target
+        if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
@@ -40,42 +35,9 @@ jobs:
           version="${package_id##*#}"
           version="${version##*@}"
           test "$version" = "$expected"
-          echo 'crate=nu_plugin_vulkan_matrix' >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-      - run: make ci-host
-        env:
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target
-      - name: Check whether this version is already published
-        id: published
-        env:
-          CRATE_NAME: ${{ steps.target.outputs.crate }}
-          CRATE_VERSION: ${{ steps.target.outputs.version }}
-        run: |
-          set -euo pipefail
-          status=$(curl --silent --show-error --retry 3 --user-agent 'nu_plugin_vulkan_matrix-release (https://github.com/kazu/nu_plugin_vulkan_matrix)' --output /dev/null --write-out '%{http_code}' "https://crates.io/api/v1/crates/$CRATE_NAME/$CRATE_VERSION")
-          case "$status" in
-            200) echo 'exists=true' >> "$GITHUB_OUTPUT" ;;
-            404) echo 'exists=false' >> "$GITHUB_OUTPUT" ;;
-            *) echo "crates.io returned HTTP $status" >&2; exit 1 ;;
-          esac
       - uses: rust-lang/crates-io-auth-action@v1
-        if: steps.published.outputs.exists != 'true'
         id: auth
-      - name: Publish crate
-        if: steps.published.outputs.exists != 'true'
-        shell: bash
+      - name: Publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target
-        run: |
-          set -euo pipefail
-          cargo publish --locked
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            args=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
-            gh release create "$GITHUB_REF_NAME" "${args[@]}"
-          fi
+        run: cargo publish --locked -p nu_plugin_vulkan_matrix

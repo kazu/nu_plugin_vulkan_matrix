@@ -1,7 +1,7 @@
 def main [version: string] {
     let semver = '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
     if $version !~ $semver {
-        error make {msg: 'Specify a SemVer version, for example V=0.10.1'}
+        error make {msg: 'Specify a SemVer version, for example V=0.1.0'}
     }
     let core = ($version | split row '+' | first)
     if ($core | str contains '-') {
