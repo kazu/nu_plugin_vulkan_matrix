@@ -16,6 +16,7 @@ The crate's tags (`v*`) mark releases.
 - release: require an explicit version and remove the publish shortcut
 - release: identify crates.io API requests with the application user agent
 - release: follow the seekzstdsep release flow
+- release: v0.1.0
 
 ### CI
 
