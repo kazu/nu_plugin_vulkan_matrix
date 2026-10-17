@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'backend-v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.96.1
+          components: rustfmt, clippy
+      - name: Check tag version
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF_NAME" in
+            backend-v*) manifest=backend/Cargo.toml; expected="${GITHUB_REF_NAME#backend-v}" ;;
+            v*) manifest=Cargo.toml; expected="${GITHUB_REF_NAME#v}" ;;
+            *) exit 1 ;;
+          esac
+          package_id=$(cargo pkgid --manifest-path "$manifest")
+          version="${package_id##*#}"
+          version="${version##*@}"
+          test "$version" = "$expected"
+      - run: make ci-host
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - name: Publish crate
+        shell: bash
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF_NAME" in
+            backend-v*) make publish-backend ;;
+            v*) make publish ;;
+            *) exit 1 ;;
+          esac

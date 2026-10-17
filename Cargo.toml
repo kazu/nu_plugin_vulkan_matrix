@@ -1,0 +1,34 @@
+[package]
+name = "nu_plugin_vulkan_matrix"
+version = "0.10.0"
+edition = "2024"
+rust-version = "1.96.1"
+description = "GPU matrix operations for Nushell using Vulkan"
+license = "MIT"
+repository = "https://github.com/kazu/nu_plugin_vulkan_matrix"
+readme = "README.md"
+keywords = ["nushell", "plugin", "vulkan", "matrix", "gpu"]
+categories = ["command-line-utilities", "mathematics"]
+
+[dependencies]
+cubecl = { version = "=0.11.0", default-features = false, features = ["std", "stdlib", "vulkan"] }
+cubecl-runtime = { version = "=0.11.0", default-features = false, features = ["std"] }
+vulkan_matrix_backend = { package = "nu_plugin_vulkan_matrix_backend", version = "0.1", path = "backend", default-features = false, features = ["std", "spirv"] }
+cubek-matmul = { version = "=0.3.0", default-features = false, features = ["std", "tiled", "multi-level"] }
+cubek-reduce = { version = "=0.3.0", default-features = false, features = ["std"] }
+cubek-std = { version = "=0.3.0", default-features = false, features = ["std"] }
+ndarray = "0.17.2"
+ash = { version = "0.38", default-features = false, features = ["std"] }
+getrandom = "0.3"
+nu-plugin = "=0.116.1"
+nu-protocol = "=0.116.1"
+serde = { version = "1", features = ["derive", "rc"] }
+typetag = "0.2"
+libc = "0.2"
+memmap2 = "0.9"
+npyz = "=0.9.1"
+py_literal = "0.4"
+tempfile = "3"
+
+[profile.dev]
+debug = 0
