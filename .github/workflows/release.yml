@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -32,24 +32,42 @@ jobs:
           workspaces: . -> target
           save-if: false
       - name: Check tag version
+        id: target
         shell: bash
         run: |
           set -euo pipefail
           case "$GITHUB_REF_NAME" in
-            backend-v*) manifest=backend/Cargo.toml; expected="${GITHUB_REF_NAME#backend-v}" ;;
-            v*) manifest=Cargo.toml; expected="${GITHUB_REF_NAME#v}" ;;
+            backend-v*) manifest=backend/Cargo.toml; crate=nu_plugin_vulkan_matrix_backend; expected="${GITHUB_REF_NAME#backend-v}" ;;
+            v*) manifest=Cargo.toml; crate=nu_plugin_vulkan_matrix; expected="${GITHUB_REF_NAME#v}" ;;
             *) exit 1 ;;
           esac
           package_id=$(cargo pkgid --manifest-path "$manifest")
           version="${package_id##*#}"
           version="${version##*@}"
           test "$version" = "$expected"
+          echo "crate=$crate" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: make ci-host
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
+      - name: Check whether this version is already published
+        id: published
+        env:
+          CRATE_NAME: ${{ steps.target.outputs.crate }}
+          CRATE_VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --retry 3 --output /dev/null --write-out '%{http_code}' "https://crates.io/api/v1/crates/$CRATE_NAME/$CRATE_VERSION")
+          case "$status" in
+            200) echo 'exists=true' >> "$GITHUB_OUTPUT" ;;
+            404) echo 'exists=false' >> "$GITHUB_OUTPUT" ;;
+            *) echo "crates.io returned HTTP $status" >&2; exit 1 ;;
+          esac
       - uses: rust-lang/crates-io-auth-action@v1
+        if: steps.published.outputs.exists != 'true'
         id: auth
       - name: Publish crate
+        if: steps.published.outputs.exists != 'true'
         shell: bash
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
@@ -61,3 +79,13 @@ jobs:
             v*) make publish ;;
             *) exit 1 ;;
           esac
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            args=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
+            case "$GITHUB_REF_NAME" in backend-v*) args+=(--latest=false) ;; esac
+            gh release create "$GITHUB_REF_NAME" "${args[@]}"
+          fi

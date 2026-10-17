@@ -23,6 +23,9 @@ GPU テストとベンチマークの手順は [開発と検証](development.md)
 ## 初回公開
 
 GitHub リポジトリを公開し、crates.io にログインした環境から次の順に実行する。
+既存の crates.io アカウントを使える。新しい crate の事前作成は不要で、初回の
+`cargo publish` が作成する。ただし Trusted Publishing は既存の別 crate から
+引き継がれないため、初回は新規 crate の公開権限を持つ API トークンで認証する。
 
 ```sh
 make package-backend
@@ -52,11 +55,23 @@ workflow は `release.yml`、environment は `release` に合わせる。
 GitHub 側にも `release` environment を作り、必要な承認条件を設定する。
 設定方法は [crates.io の公式ドキュメント](https://crates.io/docs/trusted-publishing)を参照。
 
-以後は公開対象のバージョンに一致するタグを push すると、`release.yml` が
-`make ci-host` を実行した後、対応する crate を公開する。
-`backend-v*` はバックエンド、`v*` は本体に対応する。
-バックエンドの変更がなければ本体のタグだけを作る。
-公開済みバージョンのタグを再実行しても、同じバージョンは再公開できない。
+設定後は、バージョンを更新して commit した clean な `master` から次を実行する。
 
-初回を手元から公開した場合、同じバージョンのタグを push すると公開処理が重複するため、
-タグを作るタイミングと Actions の有効化を合わせて決める。
+```sh
+make release
+```
+
+`seekzstdsep` と同じく、バージョンは Cargo.toml から取得する。
+`backend-v*` がバックエンド、`v*` が本体のタグで、バックエンドの公開 workflow が
+成功してから本体のタグを push する。既存のバックエンドタグは動かさないため、
+バックエンドのバージョンを据え置けば本体だけを公開できる。
+本体のバージョンを更新するときは validation/Cargo.toml と各 Cargo.lock も同期し、
+バックエンドを更新するときは本体・validation の依存バージョンも同期する。
+
+workflow は `make ci-host`、未公開バージョンの crate 公開、GitHub Release 作成を行う。
+初回を手元から公開した場合も、その commit から `make release` を実行できる。
+既に公開済みのバージョンは認証・再公開を省き、GitHub Release を作成する。
+これは2回目以降の Trusted Publishing 設定を不要にするものではない。
+
+公開 workflow が失敗した場合は、タグを動かさず、その run を `gh run rerun` で再実行し、
+成功を確認してから `make release` を再実行する。

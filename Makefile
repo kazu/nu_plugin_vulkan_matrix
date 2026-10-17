@@ -5,10 +5,12 @@ export CARGO_TARGET_DIR ?= $(HOME)/.cargo/target
 export RAYON_NUM_THREADS := 1
 export MATMUL_NUM_THREADS := 1
 
-.PHONY: ci ci-host ci-kick backend-check package package-backend publish publish-backend publish-dry-run publish-backend-dry-run __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
+.PHONY: ci ci-host ci-kick backend-check package package-backend publish publish-backend publish-dry-run publish-backend-dry-run release-check tag push-release release __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
 NU ?= nu
 NU_ARGS ?=
 CI_REF ?= master
+REMOTE ?= origin
+MASTER ?= master
 package-backend:
 	cargo package --manifest-path backend/Cargo.toml --locked
 
@@ -29,6 +31,50 @@ publish-dry-run:
 
 ci-kick:
 	gh workflow run ci.yml --ref $(CI_REF)
+
+# Versions come from the manifests. Existing backend tags keep their original commit.
+release-check:
+	test "$$(git branch --show-current)" = "$(MASTER)" || { echo 'release must run on $(MASTER)' >&2; exit 1; }
+	test -z "$$(git status --porcelain)" || { echo 'release requires a clean worktree' >&2; exit 1; }
+
+tag: release-check
+	backend_id=$$(cargo pkgid --locked --manifest-path backend/Cargo.toml)
+	backend_version=$${backend_id##*\#}; backend_version=$${backend_version##*@}
+	plugin_id=$$(cargo pkgid --locked)
+	plugin_version=$${plugin_id##*\#}; plugin_version=$${plugin_version##*@}
+	plugin_tag="v$$plugin_version"
+	if git show-ref --verify --quiet "refs/tags/$$plugin_tag"; then
+	  test "$$(git rev-parse "$$plugin_tag^{commit}")" = "$$(git rev-parse HEAD)" || { echo "$$plugin_tag already points to another commit" >&2; exit 1; }
+	fi
+	for tag in "backend-v$$backend_version" "$$plugin_tag"; do
+	  if ! git show-ref --verify --quiet "refs/tags/$$tag"; then git tag "$$tag"; fi
+	done
+
+# Push one release tag at a time; the plugin resolves its backend from crates.io.
+push-release: release-check
+	backend_id=$$(cargo pkgid --locked --manifest-path backend/Cargo.toml)
+	backend_version=$${backend_id##*\#}; backend_version=$${backend_version##*@}
+	plugin_id=$$(cargo pkgid --locked)
+	plugin_version=$${plugin_id##*\#}; plugin_version=$${plugin_version##*@}
+	head=$$(git rev-parse HEAD)
+	test "$$(git rev-parse "refs/tags/v$$plugin_version^{commit}")" = "$$head"
+	git push $(REMOTE) "$(MASTER)"
+	for tag in "backend-v$$backend_version" "v$$plugin_version"; do
+	  test "$$(git rev-parse "refs/tags/$$tag^{commit}")" = "$$head" || continue
+	  git push $(REMOTE) "refs/tags/$$tag"
+	  id=
+	  for ((attempt=0; attempt<30; attempt++)); do
+	    id=$$(gh run list --workflow release.yml --branch "$$tag" --event push --commit "$$head" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+	    if [[ -n "$$id" ]]; then break; fi
+	    sleep 2
+	  done
+	  test -n "$$id" || { echo "no release.yml run for $$tag" >&2; exit 1; }
+	  gh run watch "$$id" --exit-status
+	done
+
+release:
+	$(MAKE) tag
+	$(MAKE) push-release
 
 backend-check:
 	cargo fmt --manifest-path backend/Cargo.toml --check
