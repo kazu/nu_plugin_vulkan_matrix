@@ -27,8 +27,8 @@ make set-version V=0.10.1
 このターゲットは commit・タグ作成・push を行わない。
 バージョン更新時の Cargo 処理に失敗した場合は、manifest と lockfile を元に戻す。
 `make release` の CI で失敗した場合、バージョン変更は未commitのまま残る。
-内容を確認・修正して commit してから、番号を指定せず `make release` で再開できる。
-番号を指定しない `make release` は、現在のバージョンでタグ作成以降を行う。
+内容を確認・修正して commit してから、同じ番号を指定して再開する。
+`V` の指定は必須で、省略すると公開前に停止する。
 
 ## 初回公開
 
@@ -37,12 +37,12 @@ make set-version V=0.10.1
 Cargo を認証してから、次を実行する。
 
 ```sh
-make publish-dry-run
-make publish
-make release
+make release V=0.1.0
 ```
 
-公開済みバージョンは workflow が認証・再公開を省き、GitHub Release を作成する。
+初回も指定番号への更新・確認・commit・タグ作成を先に行い、手元の Cargo 認証で
+公開する。その後タグを push し、workflow は公開済みバージョンの認証・再公開を省いて
+GitHub Release を作成する。公開の入口は `make release V=...` に統一する。
 トークンはリポジトリやログに保存しない。
 
 ## Trusted Publishing
@@ -60,7 +60,7 @@ GitHub 側にも `release` environment を用意する。
 以後のリリースは `make release V=...` で行える。
 
 公開 workflow が失敗した場合は、タグを動かさず、その run を `gh run rerun` で再実行し、
-成功を確認してから `make release` を再実行する。
+成功を確認してから同じ `V` を指定して `make release` を再実行する。
 
 ## CI とキャッシュ
 

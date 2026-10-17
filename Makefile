@@ -5,7 +5,7 @@ export CARGO_TARGET_DIR ?= $(HOME)/.cargo/target
 export RAYON_NUM_THREADS := 1
 export MATMUL_NUM_THREADS := 1
 
-.PHONY: ci ci-host ci-kick package publish publish-dry-run set-version release-check tag push-release release __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
+.PHONY: ci ci-host ci-kick package set-version release-check tag push-release release __git_task_ci_probe verify bench bench-elements bench-reductions bench-gpu
 NU ?= nu
 NU_ARGS ?=
 CI_REF ?= master
@@ -13,12 +13,6 @@ REMOTE ?= origin
 MASTER ?= master
 package:
 	cargo package --locked
-
-publish:
-	cargo publish --locked
-
-publish-dry-run:
-	cargo publish --locked --dry-run
 
 ci-kick:
 	gh workflow run ci.yml --ref $(CI_REF)
@@ -60,13 +54,21 @@ push-release: release-check
 	gh run watch "$$id" --exit-status
 
 release: release-check
-	if [[ -n "$(V)" ]]; then
-	  $(MAKE) set-version V="$(V)"
-	  $(MAKE) ci-host
-	  git add Cargo.toml Cargo.lock validation/Cargo.toml validation/Cargo.lock
-	  if ! git diff --cached --quiet; then git commit -m "release: v$(V)"; fi
-	fi
+	test -n "$(V)" || { echo 'usage: make release V=<version>' >&2; exit 1; }
+	$(MAKE) set-version V="$(V)"
+	$(MAKE) ci-host
+	git add Cargo.toml Cargo.lock validation/Cargo.toml validation/Cargo.lock
+	if ! git diff --cached --quiet; then git commit -m "release: v$(V)"; fi
+	package_id=$$(cargo pkgid --locked)
+	version=$${package_id##*\#}; version=$${version##*@}
+	test "$$version" = "$(V)"
 	$(MAKE) tag
+	status=$$(curl --silent --show-error --retry 3 --output /dev/null --write-out '%{http_code}' https://crates.io/api/v1/crates/nu_plugin_vulkan_matrix)
+	case "$$status" in
+	  404) cargo publish --locked ;;
+	  200) ;; # Subsequent versions are published by the tag's workflow.
+	  *) echo "crates.io returned HTTP $$status" >&2; exit 1 ;;
+	esac
 	$(MAKE) push-release
 
 # Hosted runners have no Vulkan device. Execute the GPU tests with `make ci` locally.
