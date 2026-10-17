@@ -26,14 +26,20 @@ See [benchmarks][benchmarks] for measurement conditions and results for all GPUs
 ## Installation
 
 Requires Nu 0.116.1, Rust 1.96.1 (`rust-toolchain.toml`), and a Vulkan GPU that preserves subnormal values
-for the selected dtype. Run from the repository root.
+for the selected dtype. The backend is bundled with the plugin.
 
-Nushell:
+Install from crates.io (after the first publication, run in Nushell):
 
 ```nu
-cargo install --path . --locked --root $env.HOME
+cargo install nu_plugin_vulkan_matrix --locked --root $env.HOME
 plugin add ~/bin/nu_plugin_vulkan_matrix
 plugin use vulkan_matrix
+```
+
+To install from the GitHub source, replace the first command with:
+
+```nu
+cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked --root $env.HOME
 ```
 
 ## Usage

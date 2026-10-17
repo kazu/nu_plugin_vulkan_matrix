@@ -9,7 +9,6 @@ publish = false
 nu_plugin_vulkan_matrix = { path = "..", version = "0.10" }
 cubecl = { version = "=0.11.0", default-features = false, features = ["std", "stdlib", "vulkan"] }
 cubecl-runtime = { version = "=0.11.0", default-features = false, features = ["std"] }
-vulkan_matrix_backend = { package = "nu_plugin_vulkan_matrix_backend", version = "0.1", path = "../backend", default-features = false, features = ["std", "spirv"] }
 cubek-matmul = { version = "=0.3.0", default-features = false, features = ["std", "tiled", "multi-level"] }
 cubek-std = { version = "=0.3.0", default-features = false, features = ["std"] }
 ndarray = { version = "=0.17.2", features = ["rayon", "matrixmultiply-threading"] }

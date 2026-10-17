@@ -2,8 +2,8 @@ mod support;
 
 use cubecl::{Compiler, VulkanCompilationOptions, WgpuCompilationOptions, cube, prelude::*};
 use cubecl_runtime::runtime::Runtime;
+use nu_plugin_vulkan_matrix::{AutoCompiler, AutoRepresentation, WgpuRuntime};
 use std::{process::Command, sync::Arc};
-use vulkan_matrix_backend::{AutoCompiler, AutoRepresentation, WgpuRuntime};
 
 #[cube(launch)]
 fn write_float<T: Float>(output: &mut [T]) {

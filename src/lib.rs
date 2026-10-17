@@ -1,5 +1,8 @@
 //! GPU-resident arrays with explicit host transfers.
 
+extern crate self as vulkan_matrix_backend;
+include!("../backend/src/lib.rs");
+
 mod convert;
 mod elementwise;
 #[cfg(target_os = "linux")]

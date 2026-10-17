@@ -1,7 +1,8 @@
-# nu_plugin_vulkan_matrix_backend
+# Bundled Vulkan backend
 
 A project-specific Vulkan backend for [nu_plugin_vulkan_matrix](https://github.com/kazu/nu_plugin_vulkan_matrix).
 CubeCL and CubeK use their published packages; this backend isolates the plugin's integration changes without global dependency patches.
+It is the library target of the main package, bundled and released with the plugin. It has no separate crate version or publication.
 
 ## Origin and changes
 

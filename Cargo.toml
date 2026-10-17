@@ -9,16 +9,33 @@ repository = "https://github.com/kazu/nu_plugin_vulkan_matrix"
 readme = "README.md"
 keywords = ["nushell", "plugin", "vulkan", "matrix", "gpu"]
 categories = ["command-line-utilities", "mathematics"]
+build = "backend/build.rs"
+
+[features]
+default = ["std", "spirv"]
+deny-validation-errors = ["wgpu-hal/validation_canary"]
+exclusive-memory-only = ["cubecl-server/exclusive-memory-only"]
+msl = ["cubecl-cpp/metal", "dep:objc2", "dep:objc2-foundation"]
+persistence = ["cubecl-server/persistence"]
+pliron-dump = ["std", "cubecl-cpp/pliron-dump", "cubecl-spirv?/pliron-dump"]
+profile-tracy = ["tracy-client"]
+renderdoc = ["std", "dep:renderdoc"]
+spirv = ["cubecl-spirv", "dep:rspirv", "tracel-ash", "cubecl-common/hash"]
+std = ["upstream-wgpu/std", "cubecl-server/std", "cubecl-common/std", "cubecl-core/std", "cubecl-cpp/std", "cubecl-opt/std", "pliron/std", "sanitize-filename"]
+tracing = ["dep:tracing", "cubecl-server/tracing", "cubecl-common/tracing", "cubecl-core/tracing"]
+vulkan-validate = []
+
+[build-dependencies]
+cfg_aliases = "0.2.2"
 
 [dependencies]
 cubecl = { version = "=0.11.0", default-features = false, features = ["std", "stdlib", "vulkan"] }
 cubecl-runtime = { version = "=0.11.0", default-features = false, features = ["std"] }
-vulkan_matrix_backend = { package = "nu_plugin_vulkan_matrix_backend", version = "0.1", path = "backend", default-features = false, features = ["std", "spirv"] }
 cubek-matmul = { version = "=0.3.0", default-features = false, features = ["std", "tiled", "multi-level"] }
 cubek-reduce = { version = "=0.3.0", default-features = false, features = ["std"] }
 cubek-std = { version = "=0.3.0", default-features = false, features = ["std"] }
 ndarray = "0.17.2"
-ash = { version = "0.38", default-features = false, features = ["std"] }
+ash = "0.38"
 getrandom = "0.3"
 nu-plugin = "=0.116.1"
 nu-protocol = "=0.116.1"
@@ -29,6 +46,47 @@ memmap2 = "0.9"
 npyz = "=0.9.1"
 py_literal = "0.4"
 tempfile = "3"
+bytemuck = "1.16.1"
+cfg-if = "1.0.0"
+rspirv = { version = "0.16.0", package = "tracel-rspirv", optional = true }
+upstream-wgpu = { package = "cubecl-wgpu", version = "=0.11.0", default-features = false }
+cubecl-common = { version = "0.11.0", default-features = false }
+cubecl-core = { version = "0.11.0", default-features = false }
+cubecl-cpp = { version = "0.11.0", features = ["metal"], optional = true }
+cubecl-environment = { version = "0.11.0", default-features = false }
+cubecl-ir = { version = "0.11.0", default-features = false }
+cubecl-monitoring = { version = "0.11.0", features = ["amdgpu-busy-percent", "gpu-engine-counters", "intel-idle-residency", "io-accelerator", "nvml"], default-features = false }
+cubecl-opt = { version = "0.11.0", default-features = false }
+cubecl-server = { version = "0.11.0", default-features = false }
+cubecl-spirv = { version = "0.11.0", optional = true }
+derive-new = { version = "0.7.0", default-features = false }
+derive_more = { version = "2", features = ["not", "add", "mul", "add_assign", "mul_assign", "display", "debug", "from", "into"], default-features = false }
+half = { version = "2.5", features = ["alloc", "num-traits", "serde"], default-features = false }
+hashbrown = "0.17"
+itertools = { version = "0.15", features = ["use_alloc"], default-features = false }
+log = { version = "^0.4.22", default-features = false }
+pliron = { version = "0.19", default-features = false }
+sanitize-filename = { version = "0.6", optional = true }
+thiserror = { version = "2", default-features = false }
+tracel-ash = { version = "0.39.5", optional = true }
+tracing = { version = "^0.1.43", features = ["attributes"], optional = true, default-features = false }
+tracy-client = { version = "0.18.0", optional = true }
+wgpu-hal = { version = "^30.0.0", optional = true }
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+renderdoc = { version = "0.12", optional = true }
+wgpu = { version = "^30.0.0", features = ["fragile-send-sync-non-atomic-wasm"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+wgpu = { version = "^30.0.0", features = ["vulkan-portability", "fragile-send-sync-non-atomic-wasm"] }
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+wasm-bindgen-futures = "0.4.45"
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2 = { version = "0.6", optional = true }
+objc2-foundation = { version = "0.3", optional = true }
+objc2-metal = { version = "0.3", features = ["MTLDevice", "MTLLibrary"] }
 
 [profile.dev]
 debug = 0

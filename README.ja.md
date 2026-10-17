@@ -26,14 +26,20 @@ f64 の行列積の例（NPY ファイルからの読込を含む、10回平均�
 ## インストール
 
 Nu 0.116.1、Rust 1.96.1（`rust-toolchain.toml`）、対象 dtype の非正規化数を保持できる
-Vulkan GPU が必要です。リポジトリ直下で実行します。
+Vulkan GPU が必要です。バックエンドは本体に同梱されています。
 
-Nushell:
+crates.io からインストール（初回公開後、Nushell で実行）：
 
 ```nu
-cargo install --path . --locked --root $env.HOME
+cargo install nu_plugin_vulkan_matrix --locked --root $env.HOME
 plugin add ~/bin/nu_plugin_vulkan_matrix
 plugin use vulkan_matrix
+```
+
+GitHub のソースからインストールする場合は、最初のコマンドを次に置き換えます。
+
+```nu
+cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked --root $env.HOME
 ```
 
 ## 使う

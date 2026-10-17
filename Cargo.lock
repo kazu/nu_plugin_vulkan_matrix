@@ -1034,6 +1034,7 @@ dependencies = [
  "pliron",
  "serde",
  "serde_json",
+ "tracing",
  "variadics_please",
 ]
 
@@ -1135,6 +1136,7 @@ dependencies = [
  "serde_json",
  "spin",
  "toml",
+ "tracing",
  "turso",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1348,6 +1350,7 @@ dependencies = [
  "smallvec",
  "thiserror 2.0.21",
  "toml",
+ "tracing",
  "wasm-bindgen-futures",
 ]
 
@@ -1378,6 +1381,7 @@ dependencies = [
  "serde_json",
  "smallvec",
  "thiserror 2.0.21",
+ "tracing",
 ]
 
 [[package]]
@@ -1989,6 +1993,15 @@ dependencies = [
  "crc32fast",
  "miniz_oxide 0.9.1",
  "zlib-rs",
+]
+
+[[package]]
+name = "float-cmp"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98de4bbd547a563b716d8dfa9aad1cb19bfab00f4fa09a6a4ed21dbcf44ce9c4"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -3484,33 +3497,10 @@ name = "nu_plugin_vulkan_matrix"
 version = "0.10.0"
 dependencies = [
  "ash",
- "cubecl",
- "cubecl-runtime",
- "cubek-matmul",
- "cubek-reduce",
- "cubek-std",
- "getrandom 0.3.4",
- "libc",
- "memmap2",
- "ndarray",
- "npyz",
- "nu-plugin",
- "nu-protocol",
- "nu_plugin_vulkan_matrix_backend",
- "py_literal",
- "serde",
- "tempfile",
- "typetag",
-]
-
-[[package]]
-name = "nu_plugin_vulkan_matrix_backend"
-version = "0.1.0"
-dependencies = [
- "ash",
  "bytemuck",
  "cfg-if",
  "cfg_aliases",
+ "cubecl",
  "cubecl-common",
  "cubecl-core",
  "cubecl-cpp",
@@ -3518,23 +3508,44 @@ dependencies = [
  "cubecl-ir",
  "cubecl-monitoring",
  "cubecl-opt",
+ "cubecl-runtime",
  "cubecl-server",
  "cubecl-spirv",
  "cubecl-wgpu",
+ "cubek-matmul",
+ "cubek-reduce",
+ "cubek-std",
  "derive-new",
  "derive_more",
+ "getrandom 0.3.4",
  "half",
  "hashbrown 0.17.1",
  "itertools 0.15.0",
+ "libc",
  "log",
+ "memmap2",
+ "ndarray",
+ "npyz",
+ "nu-plugin",
+ "nu-protocol",
+ "objc2",
+ "objc2-foundation",
  "objc2-metal",
  "pliron",
+ "py_literal",
+ "renderdoc",
  "sanitize-filename",
+ "serde",
+ "tempfile",
  "thiserror 2.0.21",
  "tracel-ash",
  "tracel-rspirv",
+ "tracing",
+ "tracy-client",
+ "typetag",
  "wasm-bindgen-futures",
  "wgpu",
+ "wgpu-hal",
 ]
 
 [[package]]
@@ -4491,6 +4502,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
+name = "renderdoc"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac633a08f39bf3268714799bd8c4a1a19c19c203d817d3448bb8b91c97817cf0"
+dependencies = [
+ "bitflags",
+ "float-cmp",
+ "libloading 0.8.9",
+ "once_cell",
+ "renderdoc-sys",
+ "winapi",
+ "wio",
+]
+
+[[package]]
 name = "renderdoc-sys"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5436,6 +5462,27 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "tracy-client"
+version = "0.18.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6131992ff3e2cb96f407eb4eb005427ba15e2687260d99089b90e60e33169ce0"
+dependencies = [
+ "loom",
+ "once_cell",
+ "tracy-client-sys",
+]
+
+[[package]]
+name = "tracy-client-sys"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab27f167b093214c68413a2e0bcd318f0591af475597405ff68138ba0a433379"
+dependencies = [
+ "cc",
+ "windows-targets",
 ]
 
 [[package]]
@@ -6514,6 +6561,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "wio"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d129932f4644ac2396cb456385cbf9e63b5b30c6e8dc4820bdca4eb082037a5"
+dependencies = [
+ "winapi",
 ]
 
 [[package]]

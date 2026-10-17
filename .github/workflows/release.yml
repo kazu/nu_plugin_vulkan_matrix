@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-      - 'backend-v*'
 
 permissions:
   contents: read
@@ -36,16 +35,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          case "$GITHUB_REF_NAME" in
-            backend-v*) manifest=backend/Cargo.toml; crate=nu_plugin_vulkan_matrix_backend; expected="${GITHUB_REF_NAME#backend-v}" ;;
-            v*) manifest=Cargo.toml; crate=nu_plugin_vulkan_matrix; expected="${GITHUB_REF_NAME#v}" ;;
-            *) exit 1 ;;
-          esac
-          package_id=$(cargo pkgid --manifest-path "$manifest")
+          expected="${GITHUB_REF_NAME#v}"
+          package_id=$(cargo pkgid --locked)
           version="${package_id##*#}"
           version="${version##*@}"
           test "$version" = "$expected"
-          echo "crate=$crate" >> "$GITHUB_OUTPUT"
+          echo 'crate=nu_plugin_vulkan_matrix' >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: make ci-host
         env:
@@ -74,11 +69,7 @@ jobs:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
         run: |
           set -euo pipefail
-          case "$GITHUB_REF_NAME" in
-            backend-v*) make publish-backend ;;
-            v*) make publish ;;
-            *) exit 1 ;;
-          esac
+          make publish
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -86,6 +77,5 @@ jobs:
           set -euo pipefail
           if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             args=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
-            case "$GITHUB_REF_NAME" in backend-v*) args+=(--latest=false) ;; esac
             gh release create "$GITHUB_REF_NAME" "${args[@]}"
           fi

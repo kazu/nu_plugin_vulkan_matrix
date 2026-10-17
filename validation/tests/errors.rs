@@ -1,8 +1,8 @@
 mod support;
 
 use cubecl::{bytes::Bytes, cube, future::block_on, prelude::*};
+use nu_plugin_vulkan_matrix::RuntimeOptions;
 use support::gpu;
-use vulkan_matrix_backend::RuntimeOptions;
 
 #[cube(launch)]
 fn reject_expansion(output: &mut [u32], #[comptime] refuse: bool) {

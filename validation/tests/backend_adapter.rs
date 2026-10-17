@@ -1,7 +1,7 @@
 mod support;
 
 use cubecl::server::ServerError;
-use vulkan_matrix_backend::{AutoCompiler, WgpuServer, run_with_server};
+use nu_plugin_vulkan_matrix::{AutoCompiler, WgpuServer, run_with_server};
 
 #[test]
 fn executes_on_the_clients_server() {
