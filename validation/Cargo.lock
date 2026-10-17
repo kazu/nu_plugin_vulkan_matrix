@@ -3539,7 +3539,7 @@ dependencies = [
 
 [[package]]
 name = "nu_plugin_vulkan_matrix"
-version = "0.10.0"
+version = "0.1.0"
 dependencies = [
  "ash",
  "bytemuck",
@@ -6048,7 +6048,7 @@ dependencies = [
 
 [[package]]
 name = "vulkan-matrix-validation"
-version = "0.10.0"
+version = "0.1.0"
 dependencies = [
  "criterion",
  "cubecl",
