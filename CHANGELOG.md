@@ -5,6 +5,18 @@ next release overwrites it. What belongs in a release note belongs in a commit m
 
 The crate's tags (`v*`) mark releases.
 
+## [0.1.2] - 2026-10-19
+
+### Changed
+
+- update READMME
+
+## [0.1.1] - 2026-10-17
+
+### Changed
+
+- release: v0.1.1
+
 ## [0.1.0] - 2026-10-17
 
 ### Changed
