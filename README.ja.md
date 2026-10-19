@@ -1,5 +1,9 @@
 # nu_plugin_vulkan_matrix
 
+[![Crates.io](https://img.shields.io/crates/v/nu_plugin_vulkan_matrix.svg)](https://crates.io/crates/nu_plugin_vulkan_matrix)
+[![CI](https://img.shields.io/github/actions/workflow/status/kazu/nu_plugin_vulkan_matrix/ci.yml?branch=master)](https://github.com/kazu/nu_plugin_vulkan_matrix/actions/workflows/ci.yml)
+[![nushell](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkazu%2Fnu_plugin_vulkan_matrix%2Fmaster%2FCargo.toml&query=%24.dependencies%5B%27nu-plugin%27%5D&label=nushell&color=4E9A06)](https://github.com/nushell/nushell)
+
 [Nushell][nushell] の [matrix][matrix] に近いインターフェースで、Vulkan を使った GPU 行列演算を行う Nushell プラグイン。
 
 ## 主な特徴
@@ -28,18 +32,18 @@ f64 の行列積の例（NPY ファイルからの読込を含む、10回平均�
 Nu 0.116.1、Rust 1.96.1（`rust-toolchain.toml`）、対象 dtype の非正規化数を保持できる
 Vulkan GPU が必要です。バックエンドは本体に同梱されています。
 
-crates.io からインストール（初回公開後、Nushell で実行）：
+Nushell で crates.io からインストールします。
 
 ```nu
-cargo install nu_plugin_vulkan_matrix --locked --root $env.HOME
-plugin add ~/bin/nu_plugin_vulkan_matrix
+cargo install nu_plugin_vulkan_matrix
+plugin add ~/.cargo/bin/nu_plugin_vulkan_matrix
 plugin use vulkan_matrix
 ```
 
 GitHub のソースからインストールする場合は、最初のコマンドを次に置き換えます。
 
 ```nu
-cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked --root $env.HOME
+cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked
 ```
 
 ## 使う

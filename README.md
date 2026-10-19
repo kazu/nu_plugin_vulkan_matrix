@@ -1,5 +1,9 @@
 # nu_plugin_vulkan_matrix
 
+[![Crates.io](https://img.shields.io/crates/v/nu_plugin_vulkan_matrix.svg)](https://crates.io/crates/nu_plugin_vulkan_matrix)
+[![CI](https://img.shields.io/github/actions/workflow/status/kazu/nu_plugin_vulkan_matrix/ci.yml?branch=master)](https://github.com/kazu/nu_plugin_vulkan_matrix/actions/workflows/ci.yml)
+[![nushell](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkazu%2Fnu_plugin_vulkan_matrix%2Fmaster%2FCargo.toml&query=%24.dependencies%5B%27nu-plugin%27%5D&label=nushell&color=4E9A06)](https://github.com/nushell/nushell)
+
 A [Nushell][nushell] plugin for GPU matrix operations using Vulkan, with an interface similar to Nushell's [matrix][matrix].
 
 ## Features
@@ -28,18 +32,18 @@ See [benchmarks][benchmarks] for measurement conditions and results for all GPUs
 Requires Nu 0.116.1, Rust 1.96.1 (`rust-toolchain.toml`), and a Vulkan GPU that preserves subnormal values
 for the selected dtype. The backend is bundled with the plugin.
 
-Install from crates.io (after the first publication, run in Nushell):
+Install from crates.io in Nushell:
 
 ```nu
-cargo install nu_plugin_vulkan_matrix --locked --root $env.HOME
-plugin add ~/bin/nu_plugin_vulkan_matrix
+cargo install nu_plugin_vulkan_matrix
+plugin add ~/.cargo/bin/nu_plugin_vulkan_matrix
 plugin use vulkan_matrix
 ```
 
 To install from the GitHub source, replace the first command with:
 
 ```nu
-cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked --root $env.HOME
+cargo install --git https://github.com/kazu/nu_plugin_vulkan_matrix --locked
 ```
 
 ## Usage
